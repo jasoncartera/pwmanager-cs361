@@ -43,18 +43,28 @@ class PasswordUI():
 
         ttk.Label(self.frm, text="Enter Encryption Key:").grid(column=0, row=10, pady=(0,20))
         ttk.Entry(self.frm, textvariable=self.encrypt_key).grid(column=1, row=10, pady=(0,20))
-        ttk.Button(self.frm, text="Encrypt passwords").grid(column=2, row=10, pady=(0,20))
+        ttk.Button(self.frm, text="Encrypt passwords", command=self.encrypt).grid(column=2, row=10, pady=(0,20))
         ttk.Label(self.frm, text="Don't forget your encryption key!").grid(column=1, row=11, pady=(0,20))
 
         ttk.Button(self.frm, text="Quit", command=self.root.destroy).grid(column=1, row=12)
     
 
     def decrypt(self):
-        key = self.decrypt_key.get()
+        key = self.decrypt_key.get().encode()
         self.manager.validate_password(key)
+        self.manager.set_encrypted(False)
+
+    def encrypt(self):
+        key = self.encrypt_key.get().encode()
+        self.manager.encrypt(key)
+        self.manager.set_encrypted(True)
 
     def add_pw(self):
-        key = self.service.get()
+        service = self.service.get()
+        username = self.username.get()
+        password = self.password.get()
+        print(service, username, password)
+        self.manager.add_password(service, username, password)
 
     def start_main(self):
         self.main_page()

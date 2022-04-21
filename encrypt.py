@@ -100,5 +100,4 @@ class Encryption():
 
         with open(self.filename, 'wb') as dec_file:
             dec_file.write(decrypted)
-        
-        self.set_encrypted()
+    

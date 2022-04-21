@@ -30,23 +30,24 @@ class PasswordManager:
         self.__filename = "pw.json"
         self.__encryption = Encryption(self.__filename)
         self.__passwords = None
-        self.is_encrypted = True
+        self.encrypted = True
 
-    """
-    Private functions
-    """
-    def __decrypt(self, key):
+
+    def decrypt(self, key):
         self.__encryption.decrypt(key)
 
-    def __encrypt(self, key):
+    def encrypt(self, key):
         self.__encryption.encrypt(key)
 
-    """
-    Public functions
-    """
 
     def get_passwords(self):
         return self.__passwords
+
+    def is_encrypted(self):
+        return self.encrypted
+
+    def set_encrypted(self, bool):
+        self.encrypted = bool
 
     def set_passwords(self):
         """
@@ -64,33 +65,15 @@ class PasswordManager:
 
         return self.__passwords
 
-    def add_password(self):
-        files = os.listdir()
-        if self.is_encrypted and self.__filename in files:
-            self.validate_password(self.add_password)
-        else:
-            self.set_passwords()
-            self.is_encrypted = False
-
-        service = input("Enter the service: ")
-        email = input("Enter the email: ")
-        pw = input("Enter the password: ")
-
+    def add_password(self, service, username, password):
         pws = self.get_passwords()
         if pws and pws.get(service):
-            pws[service]['accounts'].append({'email': email, 'pw': pw})
+            pws[service]['accounts'].append({'username': username, 'pw': password})
         else:
-            pws[service] = {'accounts': [{'email': email, 'pw': pw}]}
+            pws[service] = {'accounts': [{'username': username, 'pw': password}]}
 
         with open(self.__filename, "w") as file:
             json.dump(pws, file, ensure_ascii=False, indent=4)
-
-        print("Password entered!")
-        user_in = input("Enter 1 to enter another password or 2 to return to main: ")
-        if user_in == "1":
-            self.add_password()
-        if user_in == "2":
-            self.main_page()
 
     def search_password(self):
         files = os.listdir()
@@ -129,7 +112,7 @@ class PasswordManager:
 
     def validate_password(self, key):
         try:
-            self.__decrypt(key)
+            self.decrypt(key)
             self.is_encrypted = False
             self.set_passwords()
 
@@ -141,7 +124,7 @@ class PasswordManager:
         key = input("Enter an encryption key: ").encode()
         print("Encrypting passwords...")
         self.__passwords = None
-        self.__encrypt(key)
+        self.encrypt(key)
         print("Encryption complete. Goodbye")
         sys.exit()
 
