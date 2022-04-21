@@ -127,24 +127,15 @@ class PasswordManager:
             elif user_in == "3":
                 self.main_page()
 
-    def validate_password(self, return_func):
+    def validate_password(self, key):
         try:
-            key = input("Enter the decryption key: ").encode()
-            print("Decrypting passwords...")
             self.__decrypt(key)
-            print("Decryption complete!")
             self.is_encrypted = False
             self.set_passwords()
-            return_func()
 
         except cryptography.fernet.InvalidToken:
             print("Invalid decryption key")
-            selection = input("Try again (1) or exit(2): ")
-            if selection == "1":
-                self.search_password()
-            if selection == "2":
-                # No need to call class exit function because the file is already encrypted
-                sys.exit()
+
         
     def exit(self):
         key = input("Enter an encryption key: ").encode()
