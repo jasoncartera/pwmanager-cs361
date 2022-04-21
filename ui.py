@@ -1,11 +1,14 @@
 from cgitb import text
-from tkinter import *
-from tkinter import ttk
+from tkinter import Toplevel, ttk, Tk, StringVar, messagebox
+
 from manager import PasswordManager
 
 class PasswordUI():
 
     def __init__(self):
+        """
+        Sets up the UI instance variables
+        """
         self.root = Tk()
         self.root.title("Password Manager")
         self.root.geometry('550x550') 
@@ -20,6 +23,9 @@ class PasswordUI():
         self.encrypt_key = StringVar()
 
     def main_page(self):
+        """
+        Creates the main page where the user can interact with the program
+        """
         ttk.Label(self.frm, text="Welcome to the password manager!").grid(column=1, row=0, pady=(0,20))
 
         ttk.Label(self.frm, text="Enter Decryption Key:").grid(column=0, row=1, pady=(0,20))
@@ -29,7 +35,7 @@ class PasswordUI():
 
         ttk.Label(self.frm, text="Search for password").grid(column=0, row=4, pady=(0,20))
         ttk.Entry(self.frm).grid(column=1, row=4, pady=(0,20))
-        ttk.Button(self.frm, text="Submit").grid(column=2, row=4, pady=(0,20))
+        ttk.Button(self.frm, text="Search", command=self.search_pw).grid(column=2, row=4, pady=(0,20))
 
         ttk.Label(self.frm, text="Add a new password").grid(column=1, row=5)
         ttk.Label(self.frm, text="Service").grid(column=0, row=6)
@@ -50,9 +56,17 @@ class PasswordUI():
     
 
     def decrypt(self):
-        key = self.decrypt_key.get().encode()
-        self.manager.validate_password(key)
-        self.manager.set_encrypted(False)
+        """
+        Decrypts the password file when a user enters the correct key
+        """
+        try:
+            key = self.decrypt_key.get().encode()
+            self.manager.validate_password(key)
+            self.manager.set_encrypted(False)
+            self.decrypt_key = ''
+        except:
+            self.invalid_key()
+            #self.pop_up()
 
     def encrypt(self):
         key = self.encrypt_key.get().encode()
@@ -63,26 +77,29 @@ class PasswordUI():
         service = self.service.get()
         username = self.username.get()
         password = self.password.get()
-        print(service, username, password)
         self.manager.add_password(service, username, password)
 
-    def start_main(self):
+    def search_pw(self):
+        PopupWindow(self.root)
+
+    def invalid_key(self):
+        messagebox.showwarning("Invalid token", "Decryption key invalid")
+
+    def run(self):
         self.main_page()
         self.root.mainloop()
 
-class EncryptionUI():
+class PopupWindow():
 
-    def __init__(self):
-        self.root = Tk()
-        self.root.title("Password Manager")
-        self.root.geometry('300x300')
-        self.frm = ttk.Frame(self.root, padding=10)
-        self.frm.grid()
+    def __init__(self, parent):
+        window = Toplevel(parent)
+        window.geometry("200x200")
+        window.title = "Requested password"
+        message = ttk.Label(window, text="Hello World!")
+        button = ttk.Button(window, text="Close", command=window.destroy)
 
-    def decrypt(self):
-        ttk.Label(self.frm, text="Entery the decryption key").grid(column=0, row=0)
-        ttk.Entry()
+        
 
 if __name__ == '__main__':
     ui = PasswordUI()
-    ui.start_main()
+    ui.run()

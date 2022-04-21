@@ -32,7 +32,6 @@ class PasswordManager:
         self.__passwords = None
         self.encrypted = True
 
-
     def decrypt(self, key):
         self.__encryption.decrypt(key)
 
@@ -66,6 +65,7 @@ class PasswordManager:
         return self.__passwords
 
     def add_password(self, service, username, password):
+        self.set_passwords()
         pws = self.get_passwords()
         if pws and pws.get(service):
             pws[service]['accounts'].append({'username': username, 'pw': password})
@@ -111,13 +111,9 @@ class PasswordManager:
                 self.main_page()
 
     def validate_password(self, key):
-        try:
-            self.decrypt(key)
-            self.is_encrypted = False
-            self.set_passwords()
-
-        except cryptography.fernet.InvalidToken:
-            print("Invalid decryption key")
+        self.decrypt(key)
+        self.is_encrypted = False
+        self.set_passwords()
 
         
     def exit(self):
