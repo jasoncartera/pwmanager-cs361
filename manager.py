@@ -75,12 +75,12 @@ class PasswordManager:
         with open(self.__filename, "w") as file:
             json.dump(pws, file, ensure_ascii=False, indent=4)
 
-    def search_password(self):
+    def search_password(self, service):
         files = os.listdir()
-        if self.__filename not in files:
-            service_search = input("Enter the service (gmail, amazon, ect..): ")
-            service = self.get_passwords()[service_search]
-
+        self.set_passwords()
+        if self.__filename in files:
+            result = self.get_passwords()[service]
+        return result
 
     def validate_password(self, key):
         self.decrypt(key)

@@ -2,6 +2,8 @@ from cgitb import text
 from tkinter import Toplevel, ttk, Tk, StringVar, messagebox
 from tkinter import *
 from manager import PasswordManager
+import pyperclip
+from functools import partial
 
 class PasswordUI():
 
@@ -11,14 +13,14 @@ class PasswordUI():
         """
         self.root = Tk()
         self.root.title("Password Manager")
-        self.root.geometry('550x550') 
+        self.root.geometry('575x575') 
         self.frm = ttk.Frame(self.root, padding=10)
         self.frm.grid()
         self.manager = PasswordManager()
         self.service = StringVar()
         self.username = StringVar()
         self.password = StringVar()
-        self.search = StringVar()
+        self.search_var = StringVar()
         self.decrypt_key = StringVar()
         self.encrypt_key = StringVar()
 
@@ -33,8 +35,8 @@ class PasswordUI():
         ttk.Button(self.frm, text="Decrypt passwords", command=self.decrypt).grid(column=2, row=1, pady=(0,20))
 
 
-        ttk.Label(self.frm, text="Search for password").grid(column=0, row=4, pady=(0,20))
-        ttk.Entry(self.frm).grid(column=1, row=4, pady=(0,20))
+        ttk.Label(self.frm, text="Password search by service").grid(column=0, row=4, pady=(0,20))
+        ttk.Entry(self.frm, textvariable=self.search_var).grid(column=1, row=4, pady=(0,20))
         ttk.Button(self.frm, text="Search", command=self.search_pw).grid(column=2, row=4, pady=(0,20))
 
         ttk.Label(self.frm, text="Add a new password").grid(column=1, row=5)
@@ -80,7 +82,9 @@ class PasswordUI():
         self.manager.add_password(service, username, password)
 
     def search_pw(self):
-        PopUpWindow(self.root, None)
+        service = self.search_var.get()
+        data = self.manager.search_password(service)
+        PopUpWindow(self.root, data)
 
     def invalid_key(self):
         messagebox.showwarning("Invalid token", "Decryption key invalid")
@@ -93,12 +97,23 @@ class PopUpWindow():
 
     def __init__(self, parent, data):
         window = Toplevel(parent)
-        window.geometry("300x300")
+        window.geometry("320x320")
         window.title = "Requested password"
+        accounts = data['accounts']
 
-        button = ttk.Button(window, text="Close", command=window.destroy)
-        button.place(relx=0.5, rely=0.8, anchor=CENTER)
+        i = 0
+        while i < len(accounts):
+            ttk.Label(window, text="Username: ").place(x=10, y=10+(60*i))
+            ttk.Label(window, text=accounts[i]['username']).place(x=75, y=10+(60*i))
+            ttk.Label(window, text="Password: ").place(x=10, y=30+(60*i))
+            ttk.Label(window, text=accounts[i]['pw']).place(x=75, y=30+(60*i))
+            ttk.Button(window, text="Copy password", command=partial(self.copy, accounts[i]['pw'])).place(x=175, y=15+(60*i))
+            i += 1
 
+        ttk.Button(window, text="Close", command=window.destroy).place(relx=0.5, rely=0.8, anchor=CENTER)
+
+    def copy(self, data):
+        pyperclip.copy(data)
 
 if __name__ == '__main__':
     ui = PasswordUI()
