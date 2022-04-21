@@ -90,7 +90,7 @@ class Encryption():
         """
         salt = self.get_salt()
         key = self.create_key(pw, salt)
-        
+
         fernet = Fernet(key)
 
         with open(self.filename, 'rb') as enc_file:
@@ -100,4 +100,5 @@ class Encryption():
 
         with open(self.filename, 'wb') as dec_file:
             dec_file.write(decrypted)
-    
+        
+        os.remove("salt.txt")

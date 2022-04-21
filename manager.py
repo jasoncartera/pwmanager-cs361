@@ -30,23 +30,31 @@ class PasswordManager:
         self.__filename = "pw.json"
         self.__encryption = Encryption(self.__filename)
         self.__passwords = None
-        self.encrypted = True
+        self.__is_encrypted = None
+        self.set_is_encrypted()
+    
+    def set_is_encrypted(self, bool=None):
+        if bool == None:
+            files = os.listdir()
+            if 'salt.txt' in files:
+                self.__is_encrypted = True
+            else:
+                self.__is_encrypted = False
+        else:
+            self.__is_encrypted = bool
+
+    def get_is_encrypted(self):
+        return self.__is_encrypted
 
     def decrypt(self, key):
         self.__encryption.decrypt(key)
 
     def encrypt(self, key):
         self.__encryption.encrypt(key)
-
+        self.__passwords = None
 
     def get_passwords(self):
         return self.__passwords
-
-    def is_encrypted(self):
-        return self.encrypted
-
-    def set_encrypted(self, bool):
-        self.encrypted = bool
 
     def set_passwords(self):
         """
@@ -81,57 +89,8 @@ class PasswordManager:
         if self.__filename in files:
             result = self.get_passwords()[service]
         return result
-
-    def validate_password(self, key):
-        self.decrypt(key)
-        self.is_encrypted = False
-        self.set_passwords()
-
         
-    def exit(self):
-        key = input("Enter an encryption key: ").encode()
-        print("Encrypting passwords...")
+    def exit(self, key):
         self.__passwords = None
         self.encrypt(key)
-        print("Encryption complete. Goodbye")
         sys.exit()
-
-    def main_page(self):
-        try:
-            os.system('cls||clear')
-
-            console.print(
-                    "\nThis program manages passwords in an encrypted json file. ", \
-                    "If you've saved a password before, you will need to enter a decryption key. ", \
-                    "Select an option below to get started.\n", sep='', justify="center"
-                )
-
-            print("1. Search for an account")
-            print("2. Enter a new password")
-            print("3. Exit program")
-            print()
-            selection = input("Please select an option by entering the number: ")
-
-            if selection == "1":
-                self.search_password()
-            elif selection == "2":
-                self.add_password()
-            elif selection == "3":
-                self.exit()
-            else:
-                print("Invalid selection, try again")
-                time.sleep(1)
-                self.main_page()
-
-        except Exception as e:
-            logging.error(traceback.format_exc())
-
-if __name__ == "__main__":
-
-    manager = PasswordManager()
-    manager.main_page()
-
-
-
-
-
