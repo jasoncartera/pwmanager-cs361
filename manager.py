@@ -78,37 +78,9 @@ class PasswordManager:
     def search_password(self):
         files = os.listdir()
         if self.__filename not in files:
-            print("You haven't saved any passwords yet!")
-            print("1. Enter a new password")
-            print("2. Exit program")
-            selection = input("Select an option by entering the number: ")
-
-            if selection == "1":
-                self.add_password()
-            elif selection == "2":
-                self.exit()
-            else:
-                print("Invalid selection..returning to home.")
-                time.sleep(1)
-                self.main_page()
-        else:
-            if self.is_encrypted:
-                self.validate_password(self.search_password)
             service_search = input("Enter the service (gmail, amazon, ect..): ")
             service = self.get_passwords()[service_search]
-            print(f"Accounts avalaible for {service_search}: ")
-            for i in range(len(service['accounts'])):
-                print(f"Account {i}: ")
-                print(f"Account email: {service['accounts'][i]['email']}")
-                print(f"Account password: {service['accounts'][i]['pw']}")
-                print()
-            user_in = input("1) Enter new password, 2) Search new, 3) Return to main: ")
-            if user_in == "1":
-                self.add_password()
-            elif user_in == "2":
-                self.search_password()
-            elif user_in == "3":
-                self.main_page()
+
 
     def validate_password(self, key):
         self.decrypt(key)

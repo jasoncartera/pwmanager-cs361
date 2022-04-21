@@ -1,6 +1,6 @@
 from cgitb import text
 from tkinter import Toplevel, ttk, Tk, StringVar, messagebox
-
+from tkinter import *
 from manager import PasswordManager
 
 class PasswordUI():
@@ -80,7 +80,7 @@ class PasswordUI():
         self.manager.add_password(service, username, password)
 
     def search_pw(self):
-        PopupWindow(self.root)
+        PopUpWindow(self.root, None)
 
     def invalid_key(self):
         messagebox.showwarning("Invalid token", "Decryption key invalid")
@@ -89,16 +89,16 @@ class PasswordUI():
         self.main_page()
         self.root.mainloop()
 
-class PopupWindow():
+class PopUpWindow():
 
-    def __init__(self, parent):
+    def __init__(self, parent, data):
         window = Toplevel(parent)
-        window.geometry("200x200")
+        window.geometry("300x300")
         window.title = "Requested password"
-        message = ttk.Label(window, text="Hello World!")
-        button = ttk.Button(window, text="Close", command=window.destroy)
 
-        
+        button = ttk.Button(window, text="Close", command=window.destroy)
+        button.place(relx=0.5, rely=0.8, anchor=CENTER)
+
 
 if __name__ == '__main__':
     ui = PasswordUI()
