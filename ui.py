@@ -88,7 +88,9 @@ class PasswordUI():
             if service == '' or username == '' or password == '':
                 self.warning("You must enter all of the fields")
             else:
-                self.manager.add_password(service, username, password)
+                confirm = self.confirm_pw((service, username, password))
+                if confirm:
+                    self.manager.add_password(service, username, password)
 
 
     def search_pw(self):
@@ -98,7 +100,7 @@ class PasswordUI():
             try:
                 service = self.search_var.get()
                 data = self.manager.search_password(service)
-                PopUpWindow(self.root, data)
+                PasswordSearchPopUp(self.root, data)
             except Exception as e:
                 self.warning(repr(e))
 
@@ -110,6 +112,14 @@ class PasswordUI():
 
     def warning(self, error):
         messagebox.showwarning("Warning", error)
+
+    def confirm_pw(self, data):
+        if self.manager.get_is_encrypted():
+            self.root.destroy()
+        else:
+            response = messagebox.askokcancel("Confirm Password", f"\nConfirm Service: {data[0]}\n Username: {data[1]}\n Password: {data[2]}")
+            if response:
+                return response
 
     def on_closing(self):
         if self.manager.get_is_encrypted():
@@ -123,7 +133,7 @@ class PasswordUI():
         self.main_page()
         self.root.mainloop()
 
-class PopUpWindow():
+class PasswordSearchPopUp():
 
     def __init__(self, parent, data):
         self.window = Toplevel(parent)
