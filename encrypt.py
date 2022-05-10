@@ -1,6 +1,4 @@
-from operator import ge
-from cryptography.fernet import Fernet, InvalidToken
-from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
+from cryptography.fernet import Fernet
 import os
 import base64
 import bcrypt

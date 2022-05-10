@@ -1,10 +1,6 @@
-import cryptography
 from encrypt import Encryption
 import os
 from rich.console import Console
-import time
-import traceback
-import logging
 import sys
 import json 
 
@@ -34,6 +30,9 @@ class PasswordManager:
         self.set_is_encrypted()
     
     def set_is_encrypted(self, bool=None):
+        """
+        Sets the status of encryption to True or False
+        """
         if bool == None:
             files = os.listdir()
             if 'salt.txt' in files:
@@ -44,16 +43,28 @@ class PasswordManager:
             self.__is_encrypted = bool
 
     def get_is_encrypted(self):
+        """
+        Returns status of encryption: boolean
+        """
         return self.__is_encrypted
 
     def decrypt(self, key):
+        """
+        Decrypts the password file
+        """
         self.__encryption.decrypt(key)
 
     def encrypt(self, key):
+        """
+        Encrypts the password file
+        """
         self.__encryption.encrypt(key)
         self.__passwords = None
 
     def get_passwords(self):
+        """
+        Returns the dictionary representation of all passwords in the file
+        """
         return self.__passwords
 
     def set_passwords(self):
@@ -73,6 +84,9 @@ class PasswordManager:
         return self.__passwords
 
     def add_password(self, service, username, password):
+        """
+        Adds a password to the decrypted password file.
+        """
         self.set_passwords()
         pws = self.get_passwords()
         if pws and pws.get(service):
@@ -84,6 +98,9 @@ class PasswordManager:
             json.dump(pws, file, ensure_ascii=False, indent=4)
 
     def search_password(self, service):
+        """
+        Searchs for a given password in the decrypted password file
+        """
         files = os.listdir()
         self.set_passwords()
         if self.__filename in files:

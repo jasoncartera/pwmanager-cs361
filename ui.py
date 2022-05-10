@@ -1,9 +1,9 @@
-from cgitb import text
 from tkinter import Toplevel, ttk, Tk, StringVar, messagebox
 from tkinter import *
 from manager import PasswordManager
 import pyperclip
 from functools import partial
+import requests
 
 class PasswordUI():
 
@@ -13,7 +13,7 @@ class PasswordUI():
         """
         self.root = Tk()
         self.root.title("Password Manager")
-        self.root.geometry('575x575') 
+        self.root.geometry('700x700') 
         self.root.columnconfigure(0, weight=1)
         self.root.rowconfigure(0, weight=1)
         self.root.protocol("WM_DELETE_WINDOW", self.on_closing)
@@ -26,6 +26,8 @@ class PasswordUI():
         self.search_var = StringVar()
         self.decrypt_key = StringVar()
         self.encrypt_key = StringVar()
+        self.pw_len = IntVar()
+        self.pw_len.set(10)
 
     def main_page(self):
         """
@@ -49,7 +51,8 @@ class PasswordUI():
         ttk.Entry(self.frm, textvariable=self.service).grid(column=1, row=6)
         ttk.Entry(self.frm, textvariable=self.username).grid(column=1, row=7)
         ttk.Entry(self.frm, textvariable=self.password).grid(column=1, row=8)
-
+        ttk.Button(self.frm, text="Generate Password", command=self.generate_pw).grid(column=2, row=8)
+        ttk.Spinbox(self.frm, from_=10, to=64, wrap=True, width=2, textvariable=self.pw_len).grid(column=3, row=8)
         ttk.Button(self.frm, text="Add password", command=self.add_pw).grid(column=1, row=9, pady=(0,20))
 
         ttk.Label(self.frm, text="Enter Encryption Key:").grid(column=0, row=10, pady=(0,20))
@@ -74,11 +77,17 @@ class PasswordUI():
             self.invalid_key()
 
     def encrypt(self):
+        """
+        Encrypts the password file with a given key
+        """
         key = self.encrypt_key.get().encode()
         self.manager.encrypt(key)
         self.manager.set_is_encrypted(True)
 
     def add_pw(self):
+        """
+        Adds a password to the decrypted password file
+        """
         if self.manager.get_is_encrypted():
             self.encrypted_warning()
         else:
@@ -91,9 +100,15 @@ class PasswordUI():
                 confirm = self.confirm_pw((service, username, password))
                 if confirm:
                     self.manager.add_password(service, username, password)
+                    self.password.set('')
+                    self.service.set('')
+                    self.username.set('')
 
 
     def search_pw(self):
+        """
+        Searches for passwords in the password file by service
+        """
         if self.manager.get_is_encrypted():
             self.encrypted_warning()
         else:
@@ -103,6 +118,18 @@ class PasswordUI():
                 PasswordSearchPopUp(self.root, data)
             except Exception as e:
                 self.warning(repr(e))
+
+    def generate_pw(self):
+        """
+        Requests my teammates microservice from https://pw-gen-cs361.herokuapp.com/ 
+        and returns a randomly generated password of a given length
+
+        retuns: string
+        """
+        length = self.pw_len.get()
+        pw_url = f"https://pw-gen-cs361.herokuapp.com/{length}"
+        pw = requests.get(pw_url).json()
+        self.password.set(pw['pw'])
 
     def invalid_key(self):
         messagebox.showwarning("Invalid token", "Decryption key invalid")
@@ -137,7 +164,7 @@ class PasswordSearchPopUp():
 
     def __init__(self, parent, data):
         self.window = Toplevel(parent)
-        self.window.geometry("320x320")
+        self.window.geometry("420x420")
         self.window.title = "Requested password"
         self.accounts = data['accounts']
 
@@ -147,7 +174,7 @@ class PasswordSearchPopUp():
             ttk.Label(self.window, text=self.accounts[i]['username']).place(x=75, y=10+(60*i))
             ttk.Label(self.window, text="Password: ").place(x=10, y=30+(60*i))
             ttk.Label(self.window, text=self.accounts[i]['pw']).place(x=75, y=30+(60*i))
-            ttk.Button(self.window, text="Copy password", command=partial(self.copy, self.accounts[i]['pw'])).place(x=175, y=15+(60*i))
+            ttk.Button(self.window, text="Copy password", command=partial(self.copy, self.accounts[i]['pw'])).place(x=225, y=15+(60*i))
             i += 1
 
         ttk.Button(self.window, text="Close", command=self.window.destroy).place(relx=0.5, rely=0.8, anchor=CENTER)
