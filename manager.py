@@ -97,6 +97,24 @@ class PasswordManager:
         with open(self.__filename, "w") as file:
             json.dump(pws, file, ensure_ascii=False, indent=4)
 
+    def delete_password(self, service, username):
+        self.set_passwords()
+        pws = self.get_passwords()
+        if len(pws[service]['accounts']) == 1:
+            del pws[service]
+        else:
+            for account in pws[service]['accounts']:
+                if account['username'] == username:
+                    pws[service]['accounts'].remove(account)
+
+        with open(self.__filename, "w") as file:
+            json.dump(pws, file, ensure_ascii=False, indent=4)
+
+        if pws.get(service):
+            return pws[service]
+        else:
+            return
+
     def search_password(self, service):
         """
         Searchs for a given password in the decrypted password file

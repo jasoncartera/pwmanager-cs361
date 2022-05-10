@@ -115,7 +115,7 @@ class PasswordUI():
             try:
                 service = self.search_var.get()
                 data = self.manager.search_password(service)
-                PasswordSearchPopUp(self.root, data)
+                PasswordSearchPopUp(self.root, data, service, self.manager)
             except Exception as e:
                 self.warning(repr(e))
 
@@ -162,25 +162,41 @@ class PasswordUI():
 
 class PasswordSearchPopUp():
 
-    def __init__(self, parent, data):
-        self.window = Toplevel(parent)
-        self.window.geometry("420x420")
+    def __init__(self, parent, data, service, manager):
+        self.parent = parent
+        self.window = Toplevel(self.parent)
+        self.window.geometry("450x450")
         self.window.title = "Requested password"
-        self.accounts = data['accounts']
+        self.data = data
+        self.accounts = self.data['accounts']
+        self.service = service
+        self.manager = manager
 
         i = 0
         while i < len(self.accounts):
-            ttk.Label(self.window, text="Username: ").place(x=10, y=10+(60*i))
-            ttk.Label(self.window, text=self.accounts[i]['username']).place(x=75, y=10+(60*i))
-            ttk.Label(self.window, text="Password: ").place(x=10, y=30+(60*i))
-            ttk.Label(self.window, text=self.accounts[i]['pw']).place(x=75, y=30+(60*i))
-            ttk.Button(self.window, text="Copy password", command=partial(self.copy, self.accounts[i]['pw'])).place(x=225, y=15+(60*i))
+            ttk.Label(self.window, text="Username: ").place(x=10, y=10+(75*i))
+            ttk.Label(self.window, text=self.accounts[i]['username']).place(x=80, y=10+(75*i))
+            ttk.Label(self.window, text="Password: ").place(x=10, y=30+(75*i))
+            ttk.Label(self.window, text=self.accounts[i]['pw']).place(x=80, y=30+(75*i))
+            ttk.Button(self.window, text="Copy password", command=partial(self.copy, self.accounts[i]['pw'])).place(x=10, y=50+(75*i))
+            ttk.Button(self.window, text="Delete password", command=partial(self.delete, service, self.accounts[i]['username'])).place(x=150, y=50+(75*i))
             i += 1
 
         ttk.Button(self.window, text="Close", command=self.window.destroy).place(relx=0.5, rely=0.8, anchor=CENTER)
 
     def copy(self, data):
         pyperclip.copy(data)
+
+    def delete(self, service, username):
+        self.data = self.manager.delete_password(service, username)
+        if self.data:
+            self.refresh()
+        else:
+            self.window.destroy()
+
+    def refresh(self):
+        self.window.destroy()
+        self.__init__(self.parent, self.data, self.service, self.manager)
 
 if __name__ == '__main__':
     ui = PasswordUI()
