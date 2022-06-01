@@ -40,27 +40,28 @@ class PasswordUI():
         ttk.Button(self.frm, text="Decrypt passwords", command=self.decrypt).grid(column=2, row=1, pady=(0,20))
 
 
-        ttk.Label(self.frm, text="Password search by service").grid(column=0, row=4, pady=(0,20))
-        ttk.Entry(self.frm, textvariable=self.search_var).grid(column=1, row=4, pady=(0,20))
-        ttk.Button(self.frm, text="Search", command=self.search_pw).grid(column=2, row=4, pady=(0,20))
+        ttk.Label(self.frm, text="Password search by service").grid(column=0, row=4, pady=(0,10))
+        ttk.Entry(self.frm, textvariable=self.search_var).grid(column=1, row=4, pady=(0,10))
+        ttk.Button(self.frm, text="Search", command=self.search_pw).grid(column=2, row=4, pady=(0,10))
+        ttk.Button(self.frm, text="List all services", command=self.list_services).grid(column=1, row=5, pady=(0,20))
 
-        ttk.Label(self.frm, text="Add a new password").grid(column=1, row=5)
-        ttk.Label(self.frm, text="Service").grid(column=0, row=6)
-        ttk.Label(self.frm, text="Username/Email").grid(column=0, row=7)
-        ttk.Label(self.frm, text="Password").grid(column=0, row=8)
-        ttk.Entry(self.frm, textvariable=self.service).grid(column=1, row=6)
-        ttk.Entry(self.frm, textvariable=self.username).grid(column=1, row=7)
-        ttk.Entry(self.frm, textvariable=self.password).grid(column=1, row=8)
-        ttk.Button(self.frm, text="Generate Password", command=self.generate_pw).grid(column=2, row=8)
-        ttk.Spinbox(self.frm, from_=10, to=64, wrap=True, width=2, textvariable=self.pw_len).grid(column=3, row=8)
-        ttk.Button(self.frm, text="Add password", command=self.add_pw).grid(column=1, row=9, pady=(0,20))
+        ttk.Label(self.frm, text="Add a new password").grid(column=1, row=6)
+        ttk.Label(self.frm, text="Service").grid(column=0, row=7)
+        ttk.Label(self.frm, text="Username/Email").grid(column=0, row=8)
+        ttk.Label(self.frm, text="Password").grid(column=0, row=9)
+        ttk.Entry(self.frm, textvariable=self.service).grid(column=1, row=7)
+        ttk.Entry(self.frm, textvariable=self.username).grid(column=1, row=8)
+        ttk.Entry(self.frm, textvariable=self.password).grid(column=1, row=9)
+        ttk.Button(self.frm, text="Generate Password", command=self.generate_pw).grid(column=2, row=9)
+        ttk.Spinbox(self.frm, from_=10, to=64, wrap=True, width=2, textvariable=self.pw_len).grid(column=3, row=9)
+        ttk.Button(self.frm, text="Add password", command=self.add_pw).grid(column=1, row=10, pady=(0,20))
 
-        ttk.Label(self.frm, text="Enter Encryption Key:").grid(column=0, row=10, pady=(0,20))
-        ttk.Entry(self.frm, textvariable=self.encrypt_key).grid(column=1, row=10, pady=(0,20))
-        ttk.Button(self.frm, text="Encrypt passwords", command=self.encrypt).grid(column=2, row=10, pady=(0,20))
-        ttk.Label(self.frm, text="Don't forget your encryption key!").grid(column=1, row=11, pady=(0,20))
+        ttk.Label(self.frm, text="Enter Encryption Key:").grid(column=0, row=11, pady=(0,20))
+        ttk.Entry(self.frm, textvariable=self.encrypt_key).grid(column=1, row=11, pady=(0,20))
+        ttk.Button(self.frm, text="Encrypt passwords", command=self.encrypt).grid(column=2, row=11, pady=(0,20))
+        ttk.Label(self.frm, text="Don't forget your encryption key!").grid(column=1, row=12, pady=(0,20))
 
-        ttk.Button(self.frm, text="Quit", command=self.on_closing).grid(column=1, row=12)
+        ttk.Button(self.frm, text="Quit", command=self.on_closing).grid(column=1, row=13)
     
 
     def decrypt(self):
@@ -131,6 +132,17 @@ class PasswordUI():
         pw = requests.get(pw_url).json()
         self.password.set(pw['pw'])
 
+    def list_services(self):
+        """
+        Generates a popup that lists all avalaible services with a password
+        """
+        if self.manager.get_is_encrypted():
+            self.encrypted_warning()
+        else:
+            self.manager.set_passwords()
+            data = self.manager.get_passwords()
+            ServiceListPopUp(self.root, data)
+
     def invalid_key(self):
         messagebox.showwarning("Invalid token", "Decryption key invalid")
 
@@ -160,13 +172,29 @@ class PasswordUI():
         self.main_page()
         self.root.mainloop()
 
+class ServiceListPopUp():
+
+    def __init__(self, parent, data):
+        self.parent = parent
+        self.data = data
+        self.window = Toplevel(self.parent)
+        self.window.geometry("450x450")
+
+        i = 1
+        for key in self.data.keys():
+            ttk.Label(self.window, text=key+": ").grid(row=i, column=1)
+            j = 2
+            for account in self.data[key]['accounts']:
+                ttk.Label(self.window, text=account['username']).grid(row=i, column=j)
+                j += 1
+            i += 1
+
 class PasswordSearchPopUp():
 
     def __init__(self, parent, data, service, manager):
         self.parent = parent
         self.window = Toplevel(self.parent)
         self.window.geometry("450x450")
-        self.window.title = "Requested password"
         self.data = data
         self.accounts = self.data['accounts']
         self.service = service

@@ -98,6 +98,9 @@ class PasswordManager:
             json.dump(pws, file, ensure_ascii=False, indent=4)
 
     def delete_password(self, service, username):
+        """
+        Deletes a password from the password file
+        """
         self.set_passwords()
         pws = self.get_passwords()
         if len(pws[service]['accounts']) == 1:
